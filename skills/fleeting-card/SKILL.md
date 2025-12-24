@@ -1,6 +1,9 @@
 ---
 name: fleeting-card
 description: 使用语音/口述内容在工作区 `fleeting/` 文件夹下创建 Obsidian 风格的快速笔记；需要默认 `fleeting` 标签与 1-2 句概括时触发，可调用脚本自动生成 Markdown。
+metadata:
+  author: flash-hu
+  version: "0.1"
 ---
 
 # Fleeting Card
