@@ -20,13 +20,10 @@ description: 使用语音/口述内容在工作区 `fleeting/` 文件夹下创�
 
 ```markdown
 ---
-title: <Title>
 created: <ISO 时间戳>
 tags:
   - fleeting
 ---
-
-# <Title>
 
 <1-2 句概述>
 ```
@@ -34,8 +31,8 @@ tags:
 ## 快速脚本：`create_fleeting_note.py`
 
 - 路径：`skills/fleeting-card/scripts/create_fleeting_note.py`
-- 功能：自动创建目录、写入模板、保持 `title/created/tags` frontmatter。
-- 参数：`--title`（必填，亦为文件名）、`--summary`（概述）、`--folder`（默认 `fleeting`）、`--tags`（默认只含 `fleeting`，可多值）。
+- 功能：自动创建目录、写入模板、保持 `created/tags` frontmatter。
+- 参数：`--title`（必填，仅用于文件名）、`--summary`（概述）、`--folder`（默认 `fleeting`）、`--tags`（默认只含 `fleeting`，可多值）。
 
 #### 示例
 
@@ -51,5 +48,5 @@ python skills/fleeting-card/scripts/create_fleeting_note.py \
 
 - 概述保持 40-60 字以内，优先描述“洞察/行动 + 价值”。  
 - 如口述含行动项，使用 “动词 + 结果” 句式（例如“准备 demo，验证可行性”）。  
-- 遇到包含非法字符的标题需与用户确认替换写法，必要时 `title` 保留原文、文件名用兼容版本。  
+- 遇到包含非法字符的标题需与用户确认替换写法，可在摘要开头保留原文，文件名使用兼容版本。  
 - 若脚本不可用，可按模板手动创建；务必确认 Obsidian 同步目录最新。

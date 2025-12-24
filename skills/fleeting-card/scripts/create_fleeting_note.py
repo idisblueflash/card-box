@@ -25,18 +25,15 @@ def sanitize_filename(title: str) -> str:
     return cleaned or "Untitled"
 
 
-def build_content(title: str, summary: str, tags: List[str]) -> str:
+def build_content(summary: str, tags: List[str]) -> str:
     timestamp = datetime.now().isoformat(timespec="seconds")
     tags_block = "\n".join(f"  - {tag}" for tag in tags)
     parts = [
         "---",
-        f"title: {title}",
         f"created: {timestamp}",
         "tags:",
         tags_block,
         "---",
-        "",
-        f"# {title}",
         "",
         summary.strip(),
         "",
@@ -48,7 +45,7 @@ def create_note(folder: Path, title: str, summary: str, tags: List[str]) -> Path
     folder.mkdir(parents=True, exist_ok=True)
     filename = sanitize_filename(title)
     note_path = folder / f"{filename}.md"
-    note_path.write_text(build_content(title, summary, tags), encoding="utf-8")
+    note_path.write_text(build_content(summary, tags), encoding="utf-8")
     return note_path
 
 
