@@ -9,7 +9,6 @@ to a lightly sanitized variant when illegal path characters appear.
 from __future__ import annotations
 
 import argparse
-from datetime import datetime
 from pathlib import Path
 import re
 import sys
@@ -26,11 +25,9 @@ def sanitize_filename(title: str) -> str:
 
 
 def build_content(summary: str, tags: List[str]) -> str:
-    timestamp = datetime.now().isoformat(timespec="seconds")
     tags_block = "\n".join(f"  - {tag}" for tag in tags)
     parts = [
         "---",
-        f"created: {timestamp}",
         "tags:",
         tags_block,
         "---",

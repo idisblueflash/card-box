@@ -20,7 +20,6 @@ description: 使用语音/口述内容在工作区 `fleeting/` 文件夹下创�
 
 ```markdown
 ---
-created: <ISO 时间戳>
 tags:
   - fleeting
 ---
@@ -31,7 +30,7 @@ tags:
 ## 快速脚本：`create_fleeting_note.py`
 
 - 路径：`skills/fleeting-card/scripts/create_fleeting_note.py`
-- 功能：自动创建目录、写入模板、保持 `created/tags` frontmatter。
+- 功能：自动创建目录、写入模板、保持 `tags` frontmatter。
 - 参数：`--title`（必填，仅用于文件名）、`--summary`（概述）、`--folder`（默认 `fleeting`）、`--tags`（默认只含 `fleeting`，可多值）。
 
 #### 示例
