@@ -1,12 +1,12 @@
 ---
-name: fleeting-card
+name: add-card-trigger
 description: 使用语音/口述内容在工作区 `fleeting/` 文件夹下创建 Obsidian 风格的快速笔记；需要默认 `fleeting` 标签与 1-2 句概括时触发，可调用脚本自动生成 Markdown。
 metadata:
   author: flash-hu
   version: "0.1"
 ---
 
-# Fleeting Card
+# Add Card Trigger
 
 ## 概览
 
@@ -30,16 +30,16 @@ tags:
 <1-2 句概述>
 ```
 
-## 快速脚本：`create_fleeting_note.py`
+## 快速脚本：`create_note.py`
 
-- 路径：`skills/fleeting-card/scripts/create_fleeting_note.py`
+- 路径：`skills/add-card-trigger/scripts/create_note.py`
 - 功能：自动创建目录、写入模板、保持 `tags` frontmatter。
 - 参数：`--title`（必填，仅用于文件名）、`--summary`（概述）、`--folder`（默认 `fleeting`）、`--tags`（默认只含 `fleeting`，可多值）。
 
 ### 示例
 
 ```bash
-python skills/fleeting-card/scripts/create_fleeting_note.py \
+python skills/add-card-trigger/scripts/create_note.py \
   --title "回顾AI白板想法" \
   --summary "需要把白板协同点子整理成 Miro 流程，并在下周前验证能否嵌入 Roadmap。"
 ```
