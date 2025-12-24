@@ -33,7 +33,7 @@ tags:
 - 功能：自动创建目录、写入模板、保持 `tags` frontmatter。
 - 参数：`--title`（必填，仅用于文件名）、`--summary`（概述）、`--folder`（默认 `fleeting`）、`--tags`（默认只含 `fleeting`，可多值）。
 
-#### 示例
+### 示例
 
 ```bash
 python skills/fleeting-card/scripts/create_fleeting_note.py \
