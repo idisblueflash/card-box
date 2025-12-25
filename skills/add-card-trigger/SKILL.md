@@ -1,3 +1,4 @@
+---
 name: add-card-trigger
 description: 当输入是单独的 Markdown 引用块（仅包含 `>` 引导内容）时，触发该脚本在 `fleeting/` 下创建带默认 `fleeting` 标签、1-2 句概述的 Obsidian 快速笔记。
 metadata:
