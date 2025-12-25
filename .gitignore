@@ -3,3 +3,4 @@ fleeting/
 .venv/
 .deepeval/
 __pycache__/
+.env
