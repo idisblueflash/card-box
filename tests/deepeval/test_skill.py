@@ -4,7 +4,7 @@ from pathlib import Path
 import deepeval  # noqa: F401 - ensures DeepEval plugins register
 
 
-FIXTURE_PATH = Path(__file__).resolve().parents[2] / "output" / "codex_run.json"
+FIXTURE_PATH = Path(__file__).resolve().parents[2] / "tests" / "fixtures" / "codex_run.json"
 
 
 def test_quote_card_trigger_present():
