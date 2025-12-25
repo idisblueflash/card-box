@@ -1,6 +1,9 @@
 ---
 name: quote-card-trigger
 description: 检测会话文本中的引用块；若输入只包含一个引用块，则自动调用 `add-card` 技能创建闪念卡。
+metadata:
+  author: flash-hu
+  version: "0.1"
 ---
 
 # Quote Card Trigger
