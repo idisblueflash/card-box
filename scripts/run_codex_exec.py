@@ -9,6 +9,7 @@ import shlex
 import subprocess
 import sys
 from pathlib import Path
+from subprocess import TimeoutExpired
 from typing import Any, List
 
 
@@ -39,19 +40,41 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         default=".",
         help="Directory from which to run `codex exec` (default: current directory).",
     )
+    parser.add_argument(
+        "--output-file",
+        help="Optional path to write the JSON result (in addition to stdout).",
+    )
+    parser.add_argument(
+        "--timeout",
+        type=float,
+        default=60.0,
+        help="Maximum seconds to wait for `codex exec` to finish (default: 60).",
+    )
     return parser.parse_args(argv)
 
 
-def run_codex(prompt: str, extra_args: List[str], cwd: str) -> dict[str, Any]:
+def run_codex(prompt: str, extra_args: List[str], cwd: str, timeout: float) -> dict[str, Any]:
     cmd = ["codex", "exec", "--json", "-"]
     cmd.extend(extra_args)
-    process = subprocess.run(
-        cmd,
-        input=prompt,
-        text=True,
-        capture_output=True,
-        cwd=cwd,
-    )
+    try:
+        process = subprocess.run(
+            cmd,
+            input=prompt,
+            text=True,
+            capture_output=True,
+            cwd=cwd,
+            timeout=timeout,
+        )
+    except TimeoutExpired as exc:
+        return {
+            "command": " ".join(shlex.quote(part) for part in cmd),
+            "cwd": str(Path(cwd).resolve()),
+            "success": False,
+            "exit_code": None,
+            "error": f"Timed out after {timeout} seconds.",
+            "events": [],
+            "stderr": exc.stderr,
+        }
 
     events: List[Any] = []
     for line in process.stdout.splitlines():
@@ -78,9 +101,14 @@ def run_codex(prompt: str, extra_args: List[str], cwd: str) -> dict[str, Any]:
 def main(argv: List[str]) -> int:
     args = parse_args(argv)
     prompt = read_prompt(args.text, args.file)
-    result = run_codex(prompt, args.codex_arg, args.working_dir)
+    result = run_codex(prompt, args.codex_arg, args.working_dir, args.timeout)
     json.dump(result, sys.stdout, ensure_ascii=False, indent=2)
     sys.stdout.write("\n")
+    if args.output_file:
+        Path(args.output_file).write_text(
+            json.dumps(result, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
     return 0 if result["success"] else result["exit_code"] or 1
 
 

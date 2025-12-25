@@ -18,4 +18,4 @@ python3 scripts/run_codex_exec.py \
   --codex-arg "--model gpt-4o-mini"
 ```
 
-脚本非零退出码表示 Codex 执行失败，可根据 JSON 中的 `exit_code`、`stderr` 分析原因。
+脚本非零退出码表示 Codex 执行失败，可根据 JSON 中的 `exit_code`、`stderr` 分析原因。如需把结果保存为文件，可追加 `--output-file out.json`，脚本会在标准输出的同时写入该文件。默认会等待 Codex 最多 60 秒，可使用 `--timeout 120` 这样的参数调整上限，避免长时间 prompt 被过早中断。
