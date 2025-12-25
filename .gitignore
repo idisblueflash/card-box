@@ -1,3 +1,5 @@
 fleeting/
 *.skill
 .venv/
+.deepeval/
+__pycache__/
