@@ -1,9 +1,15 @@
+import json
+import sys
 from pathlib import Path
 
 from deepeval.metrics import GEval
 from deepeval.test_case import LLMTestCase, LLMTestCaseParams
 
-from .utils.semantic_score_cache import SemanticScoreCache
+TEST_DIR = Path(__file__).resolve().parent
+if str(TEST_DIR) not in sys.path:
+    sys.path.append(str(TEST_DIR))
+
+from utils.semantic_score_cache import SemanticScoreCache
 
 CACHE_PATH = Path(__file__).resolve().parents[2] / "tests" / "fixtures" / "geval_cache.jsonl"
 CACHE_TAG = "script-search"
