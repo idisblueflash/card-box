@@ -1,0 +1,6 @@
+{"prompt": "> 复盘站会提醒：今晚前完成登陆埋点验证。", "purpose": "单段引用，验证应判定为可触发 quote-card-trigger", "expected_trigger": true, "log_file": "quote_card_trigger_cases_01.json"}
+{"prompt": "> 反思：需要提前准备演示环境。\n\n> 结论：向研发申请额外测试机。", "purpose": "多个引用块并存，验证应判定为不可触发", "expected_trigger": false, "log_file": "quote_card_trigger_cases_02.json"}
+{"prompt": "这周先做市场回访。\n\n> 客户反馈希望下个版本改进表单。", "purpose": "引用旁出现普通文本，验证应判定为不可触发", "expected_trigger": false, "log_file": "quote_card_trigger_cases_03.json"}
+{"prompt": "> 会议纪要：\n> 1. 统一Dashboard指标口径；\n> 2. 设计稿周五前交付。", "purpose": "单个引用块但多行内容，验证仍应判定为可触发", "expected_trigger": true, "log_file": "quote_card_trigger_cases_04.json"}
+{"prompt": "> !!! 立刻修复支付超时 BUG !!!", "purpose": "引用内容含特殊符号，验证仍应判定为可触发", "expected_trigger": true, "log_file": "quote_card_trigger_cases_05.json"}
+{"prompt": "请帮忙写卡片", "purpose": "完全没有引用符号，验证应判定为不可触发", "expected_trigger": false, "log_file": "quote_card_trigger_cases_06.json"}
