@@ -10,14 +10,15 @@ metadata:
 
 ## 概览
 
-将口述内容即时整理为 Obsidian 笔记：存于仓库根目录 `fleeting/`，文件名即标题，frontmatter 自带 `fleeting` 标签，正文只有 1-2 句概述，便于后续加工至永久笔记。
+将用户口述或其他技能传入的原始文本转化为 Obsidian 闪念卡：先在本技能内完成关键词提取、标题命名与摘要压缩，再通过脚本把结果写入 `fleeting/`（可通过参数覆盖）。  
+👉 上游技能（如 quote-card-trigger）只需负责判断是否需要写卡，并把原文传给 `add-card`；本技能内部承担“关键信息抽取 + 调脚本写入”两件事。
 
 ## 输入场景
 
-1. **确认输入**：获取标题与口述文本。  
-2. **提炼概述**：只保留 1-2 句概括语，避免项目符号。  
-3. **生成 Markdown**：套用模板并写入 `fleeting/<Title>.md`（不存在则新建目录）。  
-4. **反馈路径**：返回文件位置及概述，方便用户校对。
+1. **接收原文**：从调用方获取原始口述、引用内容或自由文本，可附带期望标签。  
+2. **抽取关键信息**：在技能中完成标题命名、1-2 句摘要与标签决策（默认 `fleeting`）。  
+3. **执行脚本**：调用 `create_note.py`，把生成的 `title`、`summary`、`tags` 等参数传入，脚本负责目录创建、文件名清理与 Markdown 写入。  
+4. **返回结果**：脚本输出 `Created note at <path>`，并追加一个 ```card_json fenced block，包含 `title`（实际标题）、`tags`（标签数组）、`summary`（1-2 句摘要），供 Evaluation 解析。
 
 ### Markdown 模板
 
@@ -30,11 +31,15 @@ tags:
 <1-2 句概述>
 ```
 
-## 快速脚本：`create_note.py`
+## 调用方式：`create_note.py`
 
 - 路径：`skills/add-card/scripts/create_note.py`
-- 功能：自动创建目录、写入模板、保持 `tags` frontmatter。
-- 参数：`--title`（必填，仅用于文件名）、`--summary`（概述）、`--folder`（默认 `fleeting`）、`--tags`（默认只含 `fleeting`，可多值）。
+- 功能：根据抽取好的字段（标题、摘要、标签、目录）写入 Markdown，保持 frontmatter 结构。
+- 参数：
+  - `--title`：必填，用于文件名和 frontmatter；脚本会自动去除非法字符。
+  - `--summary`：必填，1-2 句概述。
+  - `--folder`：可选，默认 `fleeting`。
+  - `--tags`：可选，多值；若未提供则自动使用 `fleeting`。
 
 ### 示例
 
@@ -44,9 +49,11 @@ python skills/add-card/scripts/create_note.py \
   --summary "需要把白板协同点子整理成 Miro 流程，并在下周前验证能否嵌入 Roadmap。"
 ```
 
-执行后会显示 `Created note at <path>` 以供复制。
+执行后会显示 `Created note at <path>` 以及一个 `card_json` fenced block，可在后续 Evaluation 中解析 `title / tags / summary`。
 
 ## 注意事项
 
+- 调用方只需判断是否触发写卡；原文在 `add-card` 内部完成抽取与压缩。  
 - 概述保持 40-60 字以内，优先描述“洞察/行动 + 价值”。  
-- 遇到包含非法字符的标题，脚本会自动去除.
+- 遇到包含非法字符的标题，脚本会自动去除；若清洗后为空，文件名将回退为 `Untitled`。  
+- `tags` 为空时自动补上 `fleeting`，传入 `literature` / `permanent` 等标签将按原值写入。

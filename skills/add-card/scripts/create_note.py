@@ -9,6 +9,7 @@ to a lightly sanitized variant when illegal path characters appear.
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 import re
 import sys
@@ -38,12 +39,12 @@ def build_content(summary: str, tags: List[str]) -> str:
     return "\n".join(parts)
 
 
-def create_note(folder: Path, title: str, summary: str, tags: List[str]) -> Path:
+def create_note(folder: Path, title: str, summary: str, tags: List[str]) -> tuple[Path, str]:
     folder.mkdir(parents=True, exist_ok=True)
     filename = sanitize_filename(title)
     note_path = folder / f"{filename}.md"
     note_path.write_text(build_content(summary, tags), encoding="utf-8")
-    return note_path
+    return note_path, filename
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
@@ -72,8 +73,18 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
 
 def main(argv: list[str]) -> int:
     args = parse_args(argv)
-    note_path = create_note(Path(args.folder), args.title, args.summary, args.tags)
+    note_path, resolved_title = create_note(
+        Path(args.folder), args.title, args.summary, args.tags
+    )
     print(f"Created note at {note_path}")
+    card_info = {
+        "title": resolved_title,
+        "tags": args.tags,
+        "summary": args.summary.strip(),
+    }
+    print("```card_json")
+    print(json.dumps(card_info, ensure_ascii=False))
+    print("```")
     return 0
 
 
