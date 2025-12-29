@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import re
-import subprocess
+import sys
 from pathlib import Path
 from typing import Iterable
 
@@ -13,9 +13,14 @@ from deepeval.test_case import LLMTestCase
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-RUN_EXEC_SCRIPT = REPO_ROOT / "scripts" / "run_codex_exec.py"
-DEFAULT_OUTPUT = REPO_ROOT / "tmp.json"
-CREATE_NOTE_MARKER = "add-card/scripts/create_note.py"
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.run_codex_exec import run_codex  # noqa: E402
+CREATE_NOTE_MARKER = "skills/add-card/scripts/create_note.py"
+DEFAULT_TIMEOUT = 60.0
+DEFAULT_WORKING_DIR = REPO_ROOT / "codex_tmp"
+DEFAULT_SANDBOX = "workspace-write"
 
 skill = "[$add-card](/Users/husongtao/.codex/skills/add-card/SKILL.md) "
 
@@ -30,28 +35,18 @@ goldens = [
 
 def load_codex_response(prompt: str) -> str:
     """Run Codex once for the given prompt and return the note summary."""
-    cmd = [
-        "python3",
-        str(RUN_EXEC_SCRIPT),
-        "--text",
-        prompt,
-        "--output-file",
-        str(DEFAULT_OUTPUT),
-    ]
-    proc = subprocess.run(
-        cmd,
-        capture_output=True,
-        text=True,
-        cwd=REPO_ROOT,
-        check=False,
+    DEFAULT_WORKING_DIR.mkdir(parents=True, exist_ok=True)
+    result = run_codex(
+        prompt=prompt,
+        extra_args=[],
+        repo_root=REPO_ROOT,
+        timeout=DEFAULT_TIMEOUT,
+        working_dir=DEFAULT_WORKING_DIR,
+        sandbox=DEFAULT_SANDBOX,
     )
-    if proc.returncode != 0:
-        raise RuntimeError(
-            f"run_codex_exec.py failed with exit {proc.returncode}: {proc.stderr}"
-        )
-
-    data = json.loads(DEFAULT_OUTPUT.read_text(encoding="utf-8"))
-    return extract_card_summary(data.get("events", []))
+    if not result.get("success"):
+        raise RuntimeError("run_codex_exec.run_codex reported failure.")
+    return extract_card_summary(result.get("events", []))
 
 
 def extract_card_summary(events: Iterable[dict]) -> str:
