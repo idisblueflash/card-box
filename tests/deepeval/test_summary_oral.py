@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 from pathlib import Path
 from typing import Iterable
@@ -14,6 +15,7 @@ from deepeval.test_case import LLMTestCase
 REPO_ROOT = Path(__file__).resolve().parents[2]
 RUN_EXEC_SCRIPT = REPO_ROOT / "scripts" / "run_codex_exec.py"
 DEFAULT_OUTPUT = REPO_ROOT / "tmp.json"
+CREATE_NOTE_MARKER = "add-card/scripts/create_note.py"
 
 skill = "[$add-card](/Users/husongtao/.codex/skills/add-card/SKILL.md) "
 
@@ -27,7 +29,7 @@ goldens = [
 
 
 def load_codex_response(prompt: str) -> str:
-    """Run Codex once for the given prompt and return the agent_message text."""
+    """Run Codex once for the given prompt and return the note summary."""
     cmd = [
         "python3",
         str(RUN_EXEC_SCRIPT),
@@ -49,19 +51,38 @@ def load_codex_response(prompt: str) -> str:
         )
 
     data = json.loads(DEFAULT_OUTPUT.read_text(encoding="utf-8"))
-    return extract_agent_message(data.get("events", []))
+    return extract_card_summary(data.get("events", []))
 
 
-def extract_agent_message(events: Iterable[dict]) -> str:
-    """Return the last agent_message text from Codex events."""
-    message = None
+def extract_card_summary(events: Iterable[dict]) -> str:
+    """Parse aggregated_output of the create_note command and return summary."""
     for event in events:
+        if event.get("type") != "item.completed":
+            continue
         item = event.get("item") or {}
-        if event.get("type") == "item.completed" and item.get("type") == "agent_message":
-            message = item.get("text")
-    if not message:
-        raise ValueError("No agent_message found in Codex response.")
-    return message
+        if item.get("type") != "command_execution":
+            continue
+        command = item.get("command", "")
+        if CREATE_NOTE_MARKER not in command:
+            continue
+        body = item.get("aggregated_output") or ""
+        summary = parse_summary_from_aggregated_output(body)
+        if summary:
+            return summary
+    raise ValueError("No create_note command output with summary found.")
+
+
+def parse_summary_from_aggregated_output(output: str) -> str:
+    """Extract card_json block from aggregated output and return its summary."""
+    match = re.search(r"```card_json\s*(\{.*?\})\s*```", output, re.DOTALL)
+    if not match:
+        return ""
+    try:
+        card = json.loads(match.group(1))
+    except json.JSONDecodeError:
+        return ""
+    summary = card.get("summary")
+    return summary or ""
 
 
 dataset = EvaluationDataset(goldens)
