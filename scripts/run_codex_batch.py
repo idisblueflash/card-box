@@ -7,6 +7,7 @@ import argparse
 import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+import shutil
 import subprocess
 from typing import Any, Dict, List
 
@@ -96,7 +97,11 @@ def main() -> int:
     base_dir = input_path.parent
     output_dir = Path(args.output_dir).resolve()
     script = Path(__file__).resolve().with_name("run_codex_exec.py")
-
+    repo_root = script.parents[1]
+    work_dir = repo_root / "codex_tmp"
+    if work_dir.exists():
+        shutil.rmtree(work_dir)
+    work_dir.mkdir(parents=True, exist_ok=True)
     output_dir.mkdir(parents=True, exist_ok=True)
     cases = load_cases(input_path, args.max_cases)
     if not cases:
