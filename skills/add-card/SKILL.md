@@ -3,7 +3,6 @@ name: add-card
 description: 当用户已经具备标题/摘要（来自口述整理或其他技能的引用提炼）时，触发此技能将内容写入仓库 `fleeting/` 目录，生成带默认 `fleeting` 标签、1-2 句概述的 Obsidian 快速笔记。
 metadata:
   author: flash-hu
-  version: "0.1"
 ---
 
 # Add Card

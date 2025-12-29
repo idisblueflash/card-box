@@ -3,7 +3,6 @@ name: quote-card-trigger
 description: 当用户提交的内容完全由一个 Markdown 引用块组成（所有非空行均以 `>` 开头，前后不含其他文本）时触发；若混入普通文本或出现多个引用块则不触发。
 metadata:
   author: flash-hu
-  version: "0.1"
 ---
 
 # Quote Card Trigger
