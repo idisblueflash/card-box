@@ -37,8 +37,8 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
     )
     parser.add_argument(
         "--working-dir",
-        default=".",
-        help="Directory from which to run `codex exec` (default: current directory).",
+        default="codex_tmp",
+        help="Directory (relative to repo root or absolute) for Codex execution (default: codex_tmp).",
     )
     parser.add_argument(
         "--output-file",
@@ -50,11 +50,25 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         default=60.0,
         help="Maximum seconds to wait for `codex exec` to finish (default: 60).",
     )
+    parser.add_argument(
+        "--sandbox",
+        default="workspace-write",
+        help="Sandbox mode passed to `codex exec --sandbox` (default: workspace-write).",
+    )
     return parser.parse_args(argv)
 
 
-def run_codex(prompt: str, extra_args: List[str], cwd: str, timeout: float) -> dict[str, Any]:
-    cmd = ["codex", "exec", "--json", "-"]
+def run_codex(
+    prompt: str,
+    extra_args: List[str],
+    repo_root: Path,
+    timeout: float,
+    working_dir: Path,
+    sandbox: str | None,
+) -> dict[str, Any]:
+    cmd = ["codex", "exec", "--json", "-", "--cd", str(working_dir)]
+    if sandbox:
+        cmd.extend(["--sandbox", sandbox])
     cmd.extend(extra_args)
     try:
         process = subprocess.run(
@@ -62,13 +76,13 @@ def run_codex(prompt: str, extra_args: List[str], cwd: str, timeout: float) -> d
             input=prompt,
             text=True,
             capture_output=True,
-            cwd=cwd,
+            cwd=str(repo_root),
             timeout=timeout,
         )
     except TimeoutExpired as exc:
         return {
             "command": " ".join(shlex.quote(part) for part in cmd),
-            "cwd": str(Path(cwd).resolve()),
+            "cwd": str(working_dir.resolve()),
             "success": False,
             "exit_code": None,
             "error": f"Timed out after {timeout} seconds.",
@@ -88,7 +102,7 @@ def run_codex(prompt: str, extra_args: List[str], cwd: str, timeout: float) -> d
 
     result: dict[str, Any] = {
         "command": " ".join(shlex.quote(part) for part in cmd),
-        "cwd": str(Path(cwd).resolve()),
+        "cwd": str(working_dir.resolve()),
         "success": process.returncode == 0,
         "exit_code": process.returncode,
         "events": events,
@@ -101,7 +115,19 @@ def run_codex(prompt: str, extra_args: List[str], cwd: str, timeout: float) -> d
 def main(argv: List[str]) -> int:
     args = parse_args(argv)
     prompt = read_prompt(args.text, args.file)
-    result = run_codex(prompt, args.codex_arg, args.working_dir, args.timeout)
+    repo_root = Path(__file__).resolve().parents[1]
+    working_dir = Path(args.working_dir)
+    if not working_dir.is_absolute():
+        working_dir = repo_root / working_dir
+    working_dir.mkdir(parents=True, exist_ok=True)
+    result = run_codex(
+        prompt,
+        args.codex_arg,
+        repo_root,
+        args.timeout,
+        working_dir,
+        args.sandbox,
+    )
     json.dump(result, sys.stdout, ensure_ascii=False, indent=2)
     sys.stdout.write("\n")
     if args.output_file:
